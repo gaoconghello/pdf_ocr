@@ -73,7 +73,7 @@ def pdf_to_image(pdf_path, page_number, output_dir='output', dpi=300, fmt='png',
 if __name__ == "__main__":
     # 使用示例
     pdf_file = "example.pdf"
-    page_to_convert = 1  # 转换第一页
+    page_to_convert = 4  # 转换第一页
     
     try:
         result = pdf_to_image(pdf_file, page_to_convert, save_pdf=True)
