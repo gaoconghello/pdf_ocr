@@ -154,3 +154,7 @@ python_c/*.exp
 machine_learning/xgb/*.ubj
 machine_learning/xgb/model_theshold.json
 machine_learning/model_threshold.json
+
+*.pdf
+
+output/
