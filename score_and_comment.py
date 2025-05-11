@@ -14,10 +14,10 @@ base_url = os.getenv("OPENROUTER_BASE_URL")
 if not base_url:
     raise ValueError("OPENROUTER_BASE_URL 未在环境变量中设置")
 
-api_key= os.getenv("OPENAI_API_KEY")
+# api_key= os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(
-    # base_url=base_url,
+    base_url=base_url,
     api_key=api_key,
 )
 
@@ -40,9 +40,9 @@ def analyze_text(text_content, prompt):
     ]
 
     completion = client.chat.completions.create(
-        # model="google/gemini-2.5-pro-preview",
+        model="google/gemini-2.5-pro-preview",
         # model="deepseek/deepseek-r1:free",
-        model="gpt-4o-mini",
+        # model="gpt-4o-mini",
         messages=[
             {
                 "role": "user",
@@ -98,83 +98,93 @@ def score_and_comment(text_file_path, output_file=None):
     """
     # 评分和点评的提示词
     prompt = """
-    Please help polish and improve the following English composition written by a middle school student. The task includes the following steps:
+    ## 硬性规则
 
-    1. First, correct all grammatical and word usage errors.
-    2. Then, enhance sentence variety and overall fluency.
-    3. Next, provide a one-sentence comment on the composition’s strengths or weaknesses.
-    4. Finally, give a score out of 15 based on the Chinese middle school English writing standards, using the following three subcategories (each out of 5):
-
-        - (a) Task Completion & Content (5 points)
-        - (b) Organization & Coherence (5 points)
-        - (c) Language (Grammar, Vocabulary, Sentence Structure) (5 points)
-        - Please show the subtotal for each category, and ensure that the final score is the sum of the three (max 15).
-
-    Scoring criteria:
-
-        -Only compositions that use advanced sentence structures such as attributive clauses, adverbial clauses, and complex linking words, with clear logical coherence, can be awarded full marks.
-        -Be strict and avoid giving high scores unless all criteria are clearly met.
-
-    5. Do not include any additional descriptive language or introductory phrases—only the revised composition, the one-sentence comment, and the score.
-
-    output xample：
-    ### 1. Corrected Version (Grammar and Word Usage):
-
-    Dear Mary,
-
-    I heard about your situation yesterday, but I'm so sorry I couldn't come to look after you. Here is some advice for you to get healthy.
-
-    First, you should have a good rest; that is good for your body. Then, you should eat more fruit and vegetables. They are good for your health. Next, you need to do more sports (or: get more exercise). Finally, it's important that you should follow the doctor's advice.
-
-    I hope you can get healthy soon.
-
-    Peng Ruixuan
+    1. **最终输出仅含**“第一部分：评分环节”和“第二部分：详细点评”两大段落。
+    2. **不得出现**开场白、结束语或任何超出规定段落的文字。
+    3. “第二部分”每条点评 **28–32 个汉字**；若无可评请写“无”。
+    4. “第二部分”语言形式评价,可突破字数限制，列出错误和正确的内容，每一个错误和改正为一行 满足markdown语法，格式参考：“used to exercise” → 应为 “as exercise” 或 “to exercise”。
+    5. 语气**温和、像老师**，既肯定优点，又指出改进方向。
+    6. **严控高分**，同等水平优先给较低分。
 
     ---
 
-    ### 2. Enhanced Version (Sentence Variety and Fluency):
+    ## 角色定位
 
-    Dear Mary,
-
-    I was sorry to hear you were unwell yesterday, and I regret that I couldn't visit you. However, I'd like to offer some advice that might help you recover and feel better.
-
-    Firstly, ensuring you get plenty of rest is crucial, as this will allow your body to heal. Secondly, it would be beneficial to eat more fruits and vegetables, because they are rich in vitamins and essential for good health. In addition, once you feel a bit stronger, engaging in some light exercise can also be helpful. Most importantly, please make sure you carefully follow all the instructions and advice given by your doctor.
-
-    I sincerely hope you get well soon and are back on your feet quickly.
-
-    Warmly,
-    Peng Ruixuan
+    你是一名经验丰富、语气亲切的中小学英语老师。
 
     ---
 
-    ### 3. One-sentence comment on the composition's strengths or weaknesses:
+    ## 任务说明
 
-    The original composition shows a kind intention and a basic attempt at logical structure, but it is significantly impaired by numerous fundamental errors in grammar, spelling, and word choice.   
+    阅读学生作文，依下列标准打分并写出建设性点评。
 
     ---
 
-    ### 4. Score out of 15:
+    ### 一：评分环节（总分 15 分）
 
-    **Score: 6**
+    | 维度           | 说明                     | 分值 |
+    | -------------- | ------------------------ | ---- |
+    | 任务完成与内容 | 主题完整度、信息充实程度 | 0–5  |
+    | 结构与连贯性   | 段落安排、过渡自然程度   | 0–5  |
+    | 语言能力       | 词汇多样性、语法准确性   | 0–5  |
+    | **总得分**     | 三项之和                 | 0–15 |
 
-    **Reasoning for the score (based on the *original* submission against Chinese middle school English writing standards):**
-    -   **Task Completion & Content (score:2):** The student understood the task of writing to a sick friend and giving advice. The advice itself is relevant (rest, food, exercise, doctor's orders).     
-    -   **Organization & Coherence (score:2.5):** The use of "First," "Then," "Next," "Finally" shows an attempt at logical organization, which is commendable at this level.
-    -   **Language (Grammar, Vocabulary, Sentence Structure) (score:1.5):** This is the weakest area.
-        -   **Grammar:** Multiple significant errors (e.g., "I you was situation," "can't to look," "You're shaild").
-        -   **Vocabulary/Word Choice:** Incorrect word forms ("advises" instead of "advice," "healthy" as a noun instead of "health") and awkward phrasing ("make healthy," "make more sports," "healthy early").
-        -   **Sentence Structure:** Sentences are very basic and often grammatically flawed. There are no advanced structures like attributive clauses, adverbial clauses, or complex linking words used correctly. Fluency is poor due to the errors.
+    > **输出格式（示例）**
+    > 任务完成与内容：3
+    > 结构与连贯性：2
+    > 语言能力：2
+    > 总得分：7
 
-    The score is kept low because of the high density of basic errors and the lack of advanced sentence structures required for higher marks according to the criteria. While the intent is good and there's an attempt at organization, the linguistic execution is far below the standard for achieving
-    even a moderate score under strict marking.    
+    ---
+
+    ### 二：详细点评
+
+    > **格式要求**
+    >
+    > - 依 1–5 大项顺序；子项以 “- ” 开头，符合 Markdown 段落语法。
+    > - **每行 28–32 汉字**；句末不加标点。
+    > - 若某项确无可评写“无”。
+
+    1. **总体评价**
+
+    - 主题聚焦度、首尾呼应及段落服务主题情况
+
+    2. **内容评价**
+
+    - 中心思想、论据支持、逻辑条理与说服力
+
+    3. **素材利用评价**
+
+    - 课文借鉴、观点引用及时态运用情况
+
+    4. **结构评价**
+
+    - 三段式完整度、衔接词使用与层次清晰度，点评涉及原文，请使用原文的英文，不要进行中文翻译
+
+    5. **语言形式评价**
+
+    - 语法拼写错误、词汇多样性与表达精准度
+
+    ---
+
+    **待批改作文：**
+
+    ```text
+    {{text_content}}
+    ```
+
     """
 
     try:
         # 读取文本文件内容
         text_content = read_text_file(text_file_path)
+        
+        # 使用format方法格式化prompt
+        formatted_prompt = prompt.format(text_content=text_content)
 
         # 使用LLM分析文本内容
-        result = analyze_text(text_content, prompt)
+        result = analyze_text(text_content, formatted_prompt)
         
         # 如果指定了输出文件，则保存结果
         if output_file:
