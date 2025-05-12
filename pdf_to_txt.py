@@ -134,6 +134,10 @@ if __name__ == "__main__":
     # 生成输出文件路径（基于原始图片名称）
     base_name = os.path.splitext(os.path.basename(local_image_path))[0]
     name_suffix = f"_{chinese_name}" if chinese_name else ""
+
+    # TODO 暂时不加入姓名
+    name_suffix = ""
+
     output_file = f"output/{base_name}_text{name_suffix}.txt"
     
     # 保存结果到文件

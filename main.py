@@ -45,8 +45,10 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         ocr_text = analyze_image(image_path, prompt)
         
         # 提取中文姓名
-        chinese_name = extract_chinese_name(ocr_text)
-        name_suffix = f"_{chinese_name}" if chinese_name else ""
+        # chinese_name = extract_chinese_name(ocr_text)
+        # name_suffix = f"_{chinese_name}" if chinese_name else ""
+        # TODO 暂时不加入姓名
+        name_suffix = ""
         
         # 步骤3：保存OCR结果到文本文件
         base_name = os.path.splitext(os.path.basename(image_path))[0]
