@@ -3,6 +3,7 @@ import argparse
 from pdf_to_img import pdf_to_image
 from pdf_to_txt import analyze_image, save_to_file
 from PyPDF2 import PdfReader
+from score_and_comment import score_and_comment
 
 
 def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='png', save_pdf=False, prompt=None):
@@ -47,9 +48,16 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         saved_path = save_to_file(ocr_text, output_file)
         print(f"文本已保存至: {saved_path}")
         
+        # 步骤4：对提取的文本进行评分和点评
+        print(f"正在进行评分和点评...")
+        score_output_file = os.path.join(output_dir, f"{base_name}_score_and_comment.md")
+        score_result = score_and_comment(saved_path, score_output_file)
+        print(f"评分和点评已保存至: {score_output_file}")
+        
         return {
             "image_path": image_path,
             "text_path": saved_path,
+            "score_path": score_output_file,
             "pdf_path": img_result.get("pdf_path"),
             "success": True
         }

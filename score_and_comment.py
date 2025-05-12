@@ -67,21 +67,28 @@ def read_text_file(file_path):
         return f.read()
 
 
-def save_to_markdown(content, output_file):
+def save_to_markdown(content, output_file, text_content=None):
     """将内容保存到markdown文件
 
     Args:
         content: 要保存的内容
         output_file: 输出文件路径
+        text_content: 原文内容，默认为None
     """
     # 确保输出目录存在
     output_dir = os.path.dirname(output_file)
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    
+    # 如果有原文内容，添加到保存内容中
+    if text_content:
+        final_content = f"{content}\n\n### 原文\n\n```text\n{text_content}\n```"
+    else:
+        final_content = content
         
     # 保存内容到文件
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(content)
+        f.write(final_content)
     
     print(f"结果已保存到: {output_file}")
 
@@ -106,6 +113,7 @@ def score_and_comment(text_file_path, output_file=None):
     4. “第二部分”语言形式评价,可突破字数限制，列出错误和正确的内容，每一个错误和改正为一行 满足markdown语法，格式参考：“used to exercise” → 应为 “as exercise” 或 “to exercise”。
     5. 语气**温和、像老师**，既肯定优点，又指出改进方向。
     6. **严控高分**，同等水平优先给较低分。
+    7. 返回严格遵守markdown语法，一：评分环节和二：详细点评 开头加入 ### ，满足markdown语法。
 
     ---
 
@@ -131,10 +139,10 @@ def score_and_comment(text_file_path, output_file=None):
     | **总得分**     | 三项之和                 | 0–15 |
 
     > **输出格式（示例）**
-    > 任务完成与内容：3
-    > 结构与连贯性：2
-    > 语言能力：2
-    > 总得分：7
+    > - 任务完成与内容：3
+    > - 结构与连贯性：2
+    > - 语言能力：2
+    > - **总得分：7**
 
     ---
 
@@ -188,7 +196,7 @@ def score_and_comment(text_file_path, output_file=None):
         
         # 如果指定了输出文件，则保存结果
         if output_file:
-            save_to_markdown(result, output_file)
+            save_to_markdown(result, output_file, text_content)
 
         return result
 
@@ -200,10 +208,10 @@ def score_and_comment(text_file_path, output_file=None):
 
 if __name__ == "__main__":
     # 直接设置文本文件路径变量
-    text_file_path = "output/example_page_4_text.txt"  # 在这里直接修改文件路径
+    text_file_path = "output/example_page_5_text.txt"  # 在这里直接修改文件路径
     
     # 设置输出文件路径
-    output_file = "output/example_page_4_score_and_comment.md"
+    output_file = "output/example_page_5_score_and_comment.md"
     
     # 调用函数进行点评和评分，并保存结果
     result = score_and_comment(text_file_path, output_file)

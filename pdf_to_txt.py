@@ -90,10 +90,13 @@ def save_to_file(text, output_path):
 
 if __name__ == "__main__":
     # 使用本地图片
-    local_image_path = "output/example_page_4.png"
+    local_image_path = "output/example_page_5.png"
     result = analyze_image(
         image_path=local_image_path,
-        prompt="请分析这张图片中的手写文字内容，因为是批改的作业，英文会有错，原文输出即可,无需解释性的语言，如果识别出文字是已经被划掉的，则不输出对应的单词"
+        prompt="""
+        请分析这张图片中的手写文字内容，因为是批改的作业，英文会有错，原文输出即可,无需解释性的语言，如果识别出文字是已经被划掉的，则不输出对应的单词
+        在最上方会有手写的中文，这是手写文字的姓名，请识别后，放入输出内容中的第一行，其他识别内容从第二行开始输出。
+        """
     )
     print(result)
     
