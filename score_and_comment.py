@@ -82,7 +82,7 @@ def save_to_markdown(content, output_file, text_content=None):
     
     # 如果有原文内容，添加到保存内容中
     if text_content:
-        final_content = f"{content}\n\n### 原文\n\n```text\n{text_content}\n```"
+        final_content = f"{content}\n\n### 原文\n\n{text_content}\n"
     else:
         final_content = content
         
