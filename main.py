@@ -4,6 +4,7 @@ from pdf_to_img import pdf_to_image
 from pdf_to_txt import analyze_image, save_to_file
 from PyPDF2 import PdfReader
 from score_and_comment import score_and_comment
+from md_to_doxc import convert_md_to_docx
 
 
 def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='png', save_pdf=False, prompt=None):
@@ -54,17 +55,24 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         score_result = score_and_comment(saved_path, score_output_file)
         print(f"评分和点评已保存至: {score_output_file}")
         
+        # 步骤5：将MD文档转换为Word文档
+        print(f"正在将MD文档转换为Word文档...")
+        docx_output_file = os.path.join(output_dir, f"{base_name}_score_and_comment.docx")
+        docx_path = convert_md_to_docx(score_output_file, docx_output_file)
+        print(f"Word文档已保存至: {docx_path}")
+        
         return {
             "image_path": image_path,
             "text_path": saved_path,
             "score_path": score_output_file,
+            "docx_path": docx_path,
             "pdf_path": img_result.get("pdf_path"),
             "success": True
         }
     
     except Exception as e:
         print(f"处理第 {page_number} 页时出错: {e}")
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": str(e), "page_number": page_number}
 
 
 def get_pdf_page_count(pdf_path):
@@ -126,7 +134,10 @@ def main():
     
     # 处理每一页
     results = []
+    failed_pages = []
+    
     for page_num in range(start_page, end_page + 1):
+        # 第一次尝试处理
         result = process_pdf_page(
             args.pdf_path, 
             page_num, 
@@ -136,11 +147,36 @@ def main():
             args.save_pdf,
             args.prompt
         )
+        
+        # 如果失败，进行一次重试
+        if not result.get("success", False):
+            print(f"第 {page_num} 页处理失败，正在进行重试...")
+            result = process_pdf_page(
+                args.pdf_path, 
+                page_num, 
+                args.output, 
+                args.dpi, 
+                args.format, 
+                args.save_pdf,
+                args.prompt
+            )
+            
+            # 如果重试后仍然失败，记录失败页码
+            if not result.get("success", False):
+                failed_pages.append(page_num)
+                print(f"第 {page_num} 页重试后仍然失败")
+        
         results.append(result)
     
     # 打印处理结果统计
     success_count = sum(1 for r in results if r.get("success", False))
     print(f"\n处理完成: 共处理 {len(results)} 页，成功 {success_count} 页，失败 {len(results) - success_count} 页")
+    
+    # 如果有失败的页码，输出详细信息
+    if failed_pages:
+        print("\n以下页码处理失败:")
+        for page in failed_pages:
+            print(f"- 第 {page} 页")
 
 
 if __name__ == "__main__":
