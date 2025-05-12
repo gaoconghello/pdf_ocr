@@ -1,7 +1,7 @@
 import os
 import argparse
 from pdf_to_img import pdf_to_image
-from pdf_to_txt import analyze_image, save_to_file
+from pdf_to_txt import analyze_image, save_to_file, extract_chinese_name
 from PyPDF2 import PdfReader
 from score_and_comment import score_and_comment
 from md_to_doxc import convert_md_to_docx
@@ -30,6 +30,7 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         - 因为是批改的作业，英文会有错，原文输出即可,无需解释性的语言，
         - 如果识别出文字是已经被黑色笔画划掉的，则不输出对应的单词，
         - 如果为红色笔画，则忽略笔画，此笔画为批注内容，可以当作不存在红色笔画，
+        - 在最上方会有手写的中文，这是手写文字的姓名，请识别后，放入输出内容中的第一行，其他识别内容从第二行开始输出。        
         """
     
     try:
@@ -43,21 +44,25 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         print(f"正在进行OCR识别...")
         ocr_text = analyze_image(image_path, prompt)
         
+        # 提取中文姓名
+        chinese_name = extract_chinese_name(ocr_text)
+        name_suffix = f"_{chinese_name}" if chinese_name else ""
+        
         # 步骤3：保存OCR结果到文本文件
         base_name = os.path.splitext(os.path.basename(image_path))[0]
-        output_file = os.path.join(output_dir, f"{base_name}_text.txt")
+        output_file = os.path.join(output_dir, f"{base_name}_text{name_suffix}.txt")
         saved_path = save_to_file(ocr_text, output_file)
         print(f"文本已保存至: {saved_path}")
         
         # 步骤4：对提取的文本进行评分和点评
         print(f"正在进行评分和点评...")
-        score_output_file = os.path.join(output_dir, f"{base_name}_score_and_comment.md")
+        score_output_file = os.path.join(output_dir, f"{base_name}_score{name_suffix}.md")
         score_result = score_and_comment(saved_path, score_output_file)
         print(f"评分和点评已保存至: {score_output_file}")
         
         # 步骤5：将MD文档转换为Word文档
         print(f"正在将MD文档转换为Word文档...")
-        docx_output_file = os.path.join(output_dir, f"{base_name}_score_and_comment.docx")
+        docx_output_file = os.path.join(output_dir, f"{base_name}_score{name_suffix}.docx")
         docx_path = convert_md_to_docx(score_output_file, docx_output_file)
         print(f"Word文档已保存至: {docx_path}")
         

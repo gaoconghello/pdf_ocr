@@ -2,6 +2,7 @@ from openai import OpenAI
 import os
 import base64
 from dotenv import load_dotenv
+import re
 
 # 加载.env文件中的环境变量
 load_dotenv()
@@ -66,6 +67,29 @@ def analyze_image(image_path, prompt):
     return completion.choices[0].message.content
 
 
+def extract_chinese_name(text):
+    """从文本中提取第一行的中文姓名
+    
+    Args:
+        text: 提取的文本内容
+    
+    Returns:
+        str: 提取的中文姓名，如果没有找到则返回空字符串
+    """
+    if not text:
+        return ""
+    
+    # 获取第一行文本
+    first_line = text.strip().split('\n')[0]
+    
+    # 检查第一行是否包含中文
+    if re.search(r'[\u4e00-\u9fff]', first_line):
+        # 移除所有空格并返回
+        return re.sub(r'\s+', '', first_line)
+    
+    return ""
+
+
 def save_to_file(text, output_path):
     """将文本内容保存到文件
 
@@ -90,19 +114,27 @@ def save_to_file(text, output_path):
 
 if __name__ == "__main__":
     # 使用本地图片
-    local_image_path = "output/example_page_5.png"
+    local_image_path = "output/example_page_12.png"
     result = analyze_image(
         image_path=local_image_path,
-        prompt="""
-        请分析这张图片中的手写文字内容，因为是批改的作业，英文会有错，原文输出即可,无需解释性的语言，如果识别出文字是已经被划掉的，则不输出对应的单词
-        在最上方会有手写的中文，这是手写文字的姓名，请识别后，放入输出内容中的第一行，其他识别内容从第二行开始输出。
-        """
+
+        prompt = """
+        请分析这张图片中的手写文字内容:
+        - 因为是批改的作业，英文会有错，原文输出即可,无需解释性的语言，
+        - 如果识别出文字是已经被黑色笔画划掉的，则不输出对应的单词，
+        - 如果为红色笔画，则忽略笔画，此笔画为批注内容，可以当作不存在红色笔画，
+        - 在最上方会有手写的中文，这是手写文字的姓名，请识别后，放入输出内容中的第一行，其他识别内容从第二行开始输出。
+        """        
     )
     print(result)
     
+    # 提取中文姓名
+    chinese_name = extract_chinese_name(result)
+    
     # 生成输出文件路径（基于原始图片名称）
     base_name = os.path.splitext(os.path.basename(local_image_path))[0]
-    output_file = f"output/{base_name}_text.txt"
+    name_suffix = f"_{chinese_name}" if chinese_name else ""
+    output_file = f"output/{base_name}_text{name_suffix}.txt"
     
     # 保存结果到文件
     saved_path = save_to_file(result, output_file)

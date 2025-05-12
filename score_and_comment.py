@@ -208,10 +208,10 @@ def score_and_comment(text_file_path, output_file=None):
 
 if __name__ == "__main__":
     # 直接设置文本文件路径变量
-    text_file_path = "output/example_page_5_text.txt"  # 在这里直接修改文件路径
+    text_file_path = "output/example_page_12_text_吴静柃.txt"  # 在这里直接修改文件路径
     
     # 设置输出文件路径
-    output_file = "output/example_page_5_score_and_comment.md"
+    output_file = "output/example_page_12_text_吴静柃.md"
     
     # 调用函数进行点评和评分，并保存结果
     result = score_and_comment(text_file_path, output_file)
