@@ -6,11 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 从环境变量获取API密钥和基础URL
-api_key = os.getenv("OPENROUTER_API_KEY")
+# api_key = os.getenv("OPENROUTER_API_KEY")
+api_key = os.getenv("SILICONFLOW_API_KEY")
 if not api_key:
     raise ValueError("OPENROUTER_API_KEY 未在环境变量中设置")
 
-base_url = os.getenv("OPENROUTER_BASE_URL")
+# base_url = os.getenv("OPENROUTER_BASE_URL")
+base_url = os.getenv("SILICONFLOW_BASE_URL")
 if not base_url:
     raise ValueError("OPENROUTER_BASE_URL 未在环境变量中设置")
 
@@ -40,9 +42,10 @@ def analyze_text(text_content, prompt):
     ]
 
     completion = client.chat.completions.create(
-        model="google/gemini-2.5-pro-preview",
+        # model="google/gemini-2.5-pro-preview",
         # model="deepseek/deepseek-r1:free",
         # model="gpt-4o-mini",
+        model="Qwen/Qwen3-235B-A22B",
         messages=[
             {
                 "role": "user",
