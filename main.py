@@ -66,6 +66,9 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
         print(f"评分和点评已保存至: {score_output_file}")
         
         # 步骤5：将MD文档转换为Word文档
+        chinese_name = extract_chinese_name(ocr_text)
+        name_suffix = f"_{chinese_name}" if chinese_name else ""
+
         print(f"正在将MD文档转换为Word文档...")
         docx_output_file = os.path.join(output_dir, f"{base_name}_score{name_suffix}.docx")
         docx_path = convert_md_to_docx(score_output_file, docx_output_file)
