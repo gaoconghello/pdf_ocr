@@ -76,6 +76,9 @@ python main.py example.pdf -o custom_output -f jpg
 ```bash
 # 保存单页 PDF 并使用自定义 OCR 提示
 python main.py example.pdf -p --prompt "请识别图片中的所有文字内容"
+
+# 将连续多页合并为一张图片（例如：将2页合并为1张图片）
+python main.py example.pdf --pages 2
 ```
 
 ### 英文作文打分和点评

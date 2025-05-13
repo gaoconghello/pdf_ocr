@@ -7,7 +7,7 @@ from score_and_comment import score_and_comment
 from md_to_doxc import convert_md_to_docx
 
 
-def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='png', save_pdf=False, prompt=None):
+def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='png', save_pdf=False, prompt=None, pages_per_image=1):
     """
     处理PDF的单页：转换为图片并进行OCR识别
     
@@ -35,8 +35,11 @@ def process_pdf_page(pdf_path, page_number, output_dir='output', dpi=300, fmt='p
     
     try:
         # 步骤1：将PDF转换为图片
-        print(f"正在处理第 {page_number} 页...")
-        img_result = pdf_to_image(pdf_path, page_number, output_dir, dpi, fmt, save_pdf)
+        if pages_per_image > 1:
+            print(f"正在处理第 {page_number} 至 {page_number + pages_per_image - 1} 页...")
+        else:
+            print(f"正在处理第 {page_number} 页...")
+        img_result = pdf_to_image(pdf_path, page_number, output_dir, dpi, fmt, save_pdf, pages_per_image)
         image_path = img_result['image_path']
         print(f"图片已保存至: {image_path}")
         
@@ -110,6 +113,7 @@ def main():
     parser.add_argument("-f", "--format", default="png", help="图片格式（默认为'png'）")
     parser.add_argument("-p", "--save-pdf", action="store_true", help="是否保存单页PDF（默认不保存）")
     parser.add_argument("--prompt", help="自定义OCR识别提示文本")
+    parser.add_argument("--pages", type=int, default=1, help="每张图片包含的PDF页数，默认为1")
     
     args = parser.parse_args()
     
@@ -139,11 +143,12 @@ def main():
     if not os.path.exists(args.output):
         os.makedirs(args.output)
     
-    # 处理每一页
+    # 处理PDF页面
     results = []
     failed_pages = []
     
-    for page_num in range(start_page, end_page + 1):
+    # 根据pages_per_image参数调整循环步长，确保每次处理指定数量的页面
+    for page_num in range(start_page, end_page + 1, args.pages):
         # 第一次尝试处理
         result = process_pdf_page(
             args.pdf_path, 
@@ -152,7 +157,8 @@ def main():
             args.dpi, 
             args.format, 
             args.save_pdf,
-            args.prompt
+            args.prompt,
+            args.pages
         )
         
         # 如果失败，进行一次重试
@@ -165,7 +171,8 @@ def main():
                 args.dpi, 
                 args.format, 
                 args.save_pdf,
-                args.prompt
+                args.prompt,
+                args.pages
             )
             
             # 如果重试后仍然失败，记录失败页码

@@ -114,7 +114,7 @@ def save_to_file(text, output_path):
 
 if __name__ == "__main__":
     # 使用本地图片
-    local_image_path = "output/example_page_12.png"
+    local_image_path = "output/扫描双面_page_1.png"
     result = analyze_image(
         image_path=local_image_path,
 
@@ -129,11 +129,12 @@ if __name__ == "__main__":
     print(result)
     
     # 提取中文姓名
-    chinese_name = extract_chinese_name(result)
+    # chinese_name = extract_chinese_name(result)
     
     # 生成输出文件路径（基于原始图片名称）
     base_name = os.path.splitext(os.path.basename(local_image_path))[0]
-    name_suffix = f"_{chinese_name}" if chinese_name else ""
+    # name_suffix = f"_{chinese_name}" if chinese_name else ""
+    name_suffix = ""
 
     # TODO 暂时不加入姓名
     name_suffix = ""

@@ -218,7 +218,7 @@ def convert_md_to_docx(input_md_path, output_docx_path):
 
 # 示例用法
 if __name__ == "__main__":
-    input_file = "output/example_page_6_score_and_comment.md"
-    output_file = "output/example_page_6_score_and_comment.docx"
+    input_file = "output/扫描双面_page_1_score.md"
+    output_file = "output/扫描双面_page_1_score.docx"
     convert_md_to_docx(input_file, output_file)
     print(f"转换完成，文件已保存至: {output_file}")
